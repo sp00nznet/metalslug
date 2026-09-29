@@ -34,17 +34,17 @@ if(MSLUG_ROM_DIR)
             list(APPEND GEN_SOURCES ${GEN_DIR}/recomp_${i}.c)
         endif()
     endforeach()
-    set(entries_arg "")
-    set(entries_dep "")
-    if(EXISTS ${MSLUG_ENTRIES})
-        set(entries_arg --entries ${MSLUG_ENTRIES})
-        set(entries_dep ${MSLUG_ENTRIES})
+    # The entry list starts empty; the `profile` target fills it from a
+    # scripted play session and the next build regenerates with it.
+    if(NOT EXISTS ${MSLUG_ENTRIES})
+        file(WRITE ${MSLUG_ENTRIES} "")
     endif()
     file(MAKE_DIRECTORY ${GEN_DIR})
     add_custom_command(
         OUTPUT ${GEN_SOURCES} ${GEN_DIR}/recomp_common.h
-        COMMAND mslug_recomp --rom-path ${MSLUG_ROM_DIR} --out ${GEN_DIR} --files ${GEN_FILES} ${entries_arg}
-        DEPENDS mslug_recomp ${entries_dep}
+        COMMAND mslug_recomp --rom-path ${MSLUG_ROM_DIR} --out ${GEN_DIR} --files ${GEN_FILES}
+                --entries ${MSLUG_ENTRIES}
+        DEPENDS mslug_recomp ${MSLUG_ENTRIES}
         COMMENT "Recompiling Metal Slug from ${MSLUG_ROM_DIR}")
     list(APPEND GAME_SOURCES ${GEN_SOURCES})
 endif()
@@ -53,6 +53,13 @@ add_executable(metalslug ${GAME_SOURCES} src/game.c)
 target_link_libraries(metalslug PRIVATE neogeorecomp)
 target_include_directories(metalslug PRIVATE src ${GEN_DIR})
 if(MSLUG_ROM_DIR)
+    # Optional: play the soak script and record the entry points that only
+    # show up at runtime (computed jumps into unrolled code), then rebuild.
+    add_custom_target(profile
+        COMMAND metalslug --headless --rom-path ${MSLUG_ROM_DIR} --frames 19000
+                --input ${CMAKE_CURRENT_SOURCE_DIR}/tests/play_long.txt --dump-misses ${MSLUG_ENTRIES}
+        DEPENDS metalslug
+        COMMENT "Profiling a scripted session for runtime-only entry points")
     target_compile_definitions(metalslug PRIVATE MSLUG_HAVE_RECOMP)
     if(MSVC)
         # Generated routines are large; /bigobj lifts the section limit.
