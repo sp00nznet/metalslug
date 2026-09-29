@@ -39,3 +39,10 @@ CMakeUserPresets.json
 *.lo
 *.zip
 *.7z
+
+# Your ROM files, and everything derived from them: the recompiled C
+# (written to build/generated) and runtime entry-point lists. Never commit.
+roms/
+generated/
+entries*.txt
+*.mp4
