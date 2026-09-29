@@ -1,11 +1,16 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 project(metalslug VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# The neogeorecomp toolkit, checked out next to this repo.
-set(NEOGEORECOMP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../neogeorecomp CACHE PATH "neogeorecomp checkout")
+# The neogeorecomp toolkit: the submodule, or a checkout next to this repo.
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/neogeorecomp/CMakeLists.txt)
+    set(ng_default ${CMAKE_CURRENT_SOURCE_DIR}/neogeorecomp)
+else()
+    set(ng_default ${CMAKE_CURRENT_SOURCE_DIR}/../neogeorecomp)
+endif()
+set(NEOGEORECOMP_DIR ${ng_default} CACHE PATH "neogeorecomp checkout")
 add_subdirectory(${NEOGEORECOMP_DIR} neogeorecomp_build)
 
 # Your ROM files (MAME set "mslug" plus the "neogeo" system ROMs, unzipped).
@@ -56,6 +61,7 @@ if(MSLUG_ROM_DIR)
     # Optional: play the soak script and record the entry points that only
     # show up at runtime (computed jumps into unrolled code), then rebuild.
     add_custom_target(profile
+        COMMAND metalslug --headless --rom-path ${MSLUG_ROM_DIR} --frames 6000 --dump-misses ${MSLUG_ENTRIES}
         COMMAND metalslug --headless --rom-path ${MSLUG_ROM_DIR} --frames 19000
                 --input ${CMAKE_CURRENT_SOURCE_DIR}/tests/play_long.txt --dump-misses ${MSLUG_ENTRIES}
         DEPENDS metalslug
@@ -69,4 +75,11 @@ endif()
 if(MSVC)
     target_compile_definitions(metalslug PRIVATE _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(mslug_recomp PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
+# Ship the SDL2 DLL (when the window is built) next to the executable.
+if(WIN32 AND TARGET SDL2::SDL2)
+    add_custom_command(TARGET metalslug POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:metalslug> $<TARGET_FILE_DIR:metalslug>
+        COMMAND_EXPAND_LISTS)
 endif()

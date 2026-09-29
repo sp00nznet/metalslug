@@ -46,3 +46,9 @@ roms/
 generated/
 entries*.txt
 *.mp4
+
+# Setup.cmd output
+deps/
+setup.log
+Metal Slug.cmd
+Metal Slug.lnk
