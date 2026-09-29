@@ -5,7 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 ## [Unreleased]
 
 ### Added
-- Boots and plays on the rebuilt neogeorecomp: the real MVS BIOS, attract mode, coin/start, and Mission 1, running on recompiled 68000 code (needs neogeorecomp `feat/generic-runtime`).
+- Boots and plays on the rebuilt neogeorecomp: the real MVS BIOS, attract mode, coin/start, and Mission 1, running on recompiled 68000 code (needs neogeorecomp #1).
 - `mslug_recomp`, the generator that recompiles the user's own ROMs into `build/generated` at build time (`MSLUG_ROM_DIR`).
 - The `profile` target: headless attract and play sessions record runtime-only entry points; the next build includes them.
 - `tests/coin_start.txt` (reach Mission 1) and `tests/play_long.txt` (5-minute soak).
