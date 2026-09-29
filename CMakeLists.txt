@@ -17,7 +17,7 @@ set(MSLUG_ENTRIES "${CMAKE_BINARY_DIR}/entries.txt" CACHE FILEPATH "Extra entry 
 
 # Stage 1: the generator.
 add_executable(mslug_recomp src/recomp_main.c src/game.c)
-target_link_libraries(mslug_recomp PRIVATE m68krecomp)
+target_link_libraries(mslug_recomp PRIVATE m68krecomp_core)
 target_include_directories(mslug_recomp PRIVATE src)
 
 # Stage 2: the player, with the generated C when ROMs are available.
