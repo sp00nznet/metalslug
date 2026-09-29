@@ -1,168 +1,112 @@
-# Metal Slug: Super Vehicle-001 — Static Recompilation
+# Metal Slug: static recompilation
 
-**A native PC port of Metal Slug (1996) via static recompilation of the original Neo Geo 68000 code.**
+**Metal Slug (Nazca/SNK, 1996) running as a native PC program: its 68000 code is recompiled to C and runs on the [neogeorecomp](https://github.com/sp00nznet/neogeorecomp) board model.**
 
-Metal Slug is the run-and-gun masterpiece that defined a genre. Built by Nazca Corporation — a team of former Irem veterans who had cut their teeth on In The Hunt and Gunforce II — it pushed the Neo Geo MVS hardware to its limits with fluid hand-drawn animation, destructible environments, and the iconic SV-001 tank. This project aims to bring it to modern hardware not through emulation, but by recompiling the original machine code into native x86-64.
+This is the reference game for neogeorecomp. The toolkit does all the work; this repo describes the ROM set and builds the game.
 
-## The Game
+> **No game data here.** You need your own Metal Slug and Neo Geo system ROM dumps (MAME sets `mslug` and `neogeo`). The recompiled C is generated from your dump on your machine, into `build/`. It is never committed or distributed, and neither is anything else derived from the ROMs.
 
-- **Title**: Metal Slug: Super Vehicle-001 (メタルスラッグ)
-- **Developer**: Nazca Corporation
-- **Publisher**: SNK
-- **Platform**: Neo Geo MVS / AES (NGH-201)
-- **Year**: 1996
-- **Genre**: Side-scrolling run-and-gun
-- **Players**: 1-2 simultaneous
+## Status
 
-### Missions
+**v0.1.0-dev, alpha.** Metal Slug boots, runs attract mode, takes a coin and plays Mission 1 on recompiled code. **There is no sound yet.**
 
-| # | Mission | Setting | Boss |
-|---|---------|---------|------|
-| 1 | Villeneuve Mt. System | Forest / Mountain | Tetsuyuki (gunship fortress) |
-| 2 | Ronbertburg City | Urban | Hairbuster Riberts (bomber) |
-| 3 | Kurthehirt Valley | Valley | Tani Oh (siege tank) |
-| 4 | Ridge 256 | Ridge / Fortifications | Shoe & Karn (twin tanks) |
-| 5 | Gerhardt City | City | Iron Nokana (heavy tank) |
-| 6 | Straits of Traven | Coastal / Airport | Hi-Do (Morden's gunship) |
+- Boot through the real MVS system ROM → eyecatcher → title → How to Play → Mission 1, with continues.
+- A 5-minute scripted soak runs **100% natively** (0 interpreted instructions) after the profile pass, and `--verify` checks **14.06M** recompiled blocks against the Musashi interpreter with **0 mismatches**.
+- Frame output is identical to the interpreter's, byte for byte, and identical between Windows and Linux builds.
+- Not yet: sound, later missions checked by script, gamepad support, and a settings menu.
 
-Six missions of escalating chaos, from jungle ambushes to the final assault on General Morden's forces. The game was originally conceived as a pure tank combat game before the on-foot gameplay was added — remnants of that early design survive in the ROM as unused sprite data.
+## Screenshots
 
-## ROM Details
+All real output from the recompiled build (`--headless --screenshot`):
 
-| ROM | Type | Size | Purpose |
-|-----|------|------|---------|
-| `201-p1.p1` | P ROM | 2 MB | 68000 program code |
-| `201-s1.s1` | S ROM | 128 KB | Fix layer text/HUD tiles |
-| `201-c1.c1` / `c2` | C ROM pair | 4 MB each | Sprite graphics (bitplanes 0-1, 2-3) |
-| `201-c3.c3` / `c4` | C ROM pair | 4 MB each | Sprite graphics (continued) |
-| `201-m1.m1` | M ROM | 128 KB | Z80 audio driver |
-| `201-v1.v1` | V ROM | 4 MB | ADPCM audio samples |
-| `201-v2.v2` | V ROM | 4 MB | ADPCM audio samples |
+| | |
+|---|---|
+| ![MVS eyecatcher](docs/screenshots/bios.png) | ![Title](docs/screenshots/title.png) |
+| ![How to play](docs/screenshots/howto.png) | ![Mission 1](docs/screenshots/mission.png) |
+| ![Continue](docs/screenshots/continue.png) | ![SV-001 in the river village](docs/screenshots/tank.png) |
 
-**Total: ~22.5 MB** — no encryption, no protection, no bankswitching needed. The 2 MB P ROM fits within the Neo Geo's two 1 MB address windows ($000000-$0FFFFF fixed, $200000-$2FFFFF secondary). This makes Metal Slug an ideal recompilation target: the entire program can be linearly disassembled.
+## Getting started
 
-### PCB Details
-- **PROG board**: PROGBK1 (standard, no protection CPLD)
-- **CHA board**: CHA256 (standard character board)
-- **MAME driver**: Standard `neogeo.cpp` — no game-specific handlers needed
+### Quick start (Windows)
 
-## How This Project Works
+1. Download this repo: **Code → Download ZIP**, then unzip it. A `git clone` works too.
+2. Put your **`mslug.zip`** and **`neogeo.zip`** (MAME sets) in the unzipped folder, or in `Downloads`.
+3. Double-click **`Setup.cmd`**.
 
-This repository contains the game-specific recompiled code for Metal Slug. It depends on [neogeorecomp](https://github.com/sp00nznet/neogeorecomp), which provides the Neo Geo hardware runtime (video, audio, input, memory map).
+   It checks for Git, CMake, the Visual Studio C++ build tools and SDL2, and asks before installing anything that's missing (it says what and how big). It finds and checksums your ROMs, recompiles and builds the game (a few minutes), and leaves a **Metal Slug** launcher in the folder. If something fails, it stops with one sentence on what to do and keeps the details in `setup.log`. Running it again picks up where it stopped.
+4. Double-click **Metal Slug**.
+
+**On Linux**, run `./setup.sh` instead, optionally with `--rom-zip PATH --bios-zip PATH`. It does the same steps and offers the `apt` command for anything missing. When it finishes, run `./metalslug.sh`.
+
+Keys: **arrows** move, **Z** shoot, **X** jump, **C** grenade, **5** insert coin, **1** start, **Esc** quit.
+
+### Step by step
+
+These are the commands `Setup.cmd` runs.
+
+**Prerequisites:** Git; CMake 3.21+; a C compiler (Visual Studio 2022 with *Desktop development with C++* on Windows, or gcc on Linux); SDL2 for the window (optional, since headless builds need nothing). On Linux: `sudo apt install git cmake gcc libsdl2-dev`.
+
+1. **Clone with the toolkit submodule:**
+   ```
+   git clone --recurse-submodules https://github.com/sp00nznet/metalslug
+   cd metalslug
+   ```
+2. **Unzip your ROMs into `roms/`.** From `mslug.zip`: `201-p1.p1 201-s1.s1 201-m1.m1 201-c1.c1 201-c2.c2 201-c3.c3 201-c4.c4 201-v1.v1 201-v2.v2`. From `neogeo.zip`: `sp-s2.sp1 sfix.sfix sm1.sm1 000-lo.lo`. [docs/game-notes.md](docs/game-notes.md) lists the CRC32s.
+3. **Configure.** On Windows, point CMake at SDL2: vcpkg's toolchain file, or `-DSDL2_DIR=<SDL2-devel-VC>/cmake`.
+   ```
+   cmake -S . -B build -DMSLUG_ROM_DIR=roms
+   ```
+4. **Build.** The generator recompiles your ROMs into `build/generated` first:
+   ```
+   cmake --build build --config Release
+   ```
+   Expected in the output:
+   ```
+   [m68krecomp] pointer scan: 10003 seeds
+   [m68krecomp] mslug: 445072 instructions emitted across routines
+   [m68krecomp] 15006 routines, 33423 dispatch entries -> .../build/generated
+   ```
+5. **Profile (optional).** This plays two scripted sessions headless to find code only reached at runtime, then rebuilds with it:
+   ```
+   cmake --build build --config Release --target profile
+   cmake --build build --config Release
+   ```
+6. **Play:**
+   ```
+   build/Release/metalslug --rom-path roms          (Linux: build/metalslug)
+   ```
+
+Trip-ups:
+- *`error: cannot open roms/201-p1.p1`*: the ROMs are not in `roms/`, or you are running from a different folder. Pass `--rom-path`.
+- *"Submodules missing"*: you cloned without `--recurse-submodules`. Run `git submodule update --init --recursive`.
+- *`python` or PATH trouble*: none of this needs Python. If a freshly installed tool isn't found, open a new terminal so it sees the updated PATH.
+- *No window, and "built without SDL2; run with --headless"*: CMake didn't find SDL2 (see step 3).
+
+## Usage
 
 ```
-┌──────────────────────────┐
-│   metalslug (this repo)  │
-│  ┌────────────────────┐  │
-│  │  recomp/*.c        │  │  ← recompiled 68k functions
-│  │  src/main.c        │  │  ← entry point, function registration
-│  └────────┬───────────┘  │
-│           │ links        │
-│  ┌────────▼───────────┐  │
-│  │   neogeorecomp     │  │  ← Neo Geo hardware runtime
-│  │   (git submodule)  │  │
-│  └────────────────────┘  │
-└──────────────────────────┘
+metalslug --rom-path roms                                  # play
+metalslug --headless --frames 1900 --input tests/coin_start.txt --record run.mp4
+metalslug --headless --verify --frames 1801 --input tests/coin_start.txt
+metalslug --headless --interp --frames 1801 --screenshot 1800:interp.png
 ```
 
-### Project Structure
+The toolkit's [docs/running.md](https://github.com/sp00nznet/neogeorecomp/blob/master/docs/running.md) covers every option and the input-script format. `tests/coin_start.txt` reaches Mission 1, and `tests/play_long.txt` is the 5-minute soak.
 
-```
-metalslug/
-├── src/
-│   └── main.c              — entry point, ROM loading, function table setup
-├── recomp/
-│   └── (recompiled 68k function files will live here)
-├── docs/
-│   └── game_notes.md       — technical analysis, function map, game-specific quirks
-├── CMakeLists.txt
-└── README.md
-```
+## Building from source
 
-## Building
+See *Step by step* above. `MSLUG_ROM_DIR` is the only game-specific option. Without it, the build is interpreter-only, which is useful for working on the toolkit without regenerating.
 
-### Prerequisites
+## Documentation
 
-- **CMake** 3.20+
-- **C17 compiler** (MSVC 2022, Clang 14+, or GCC 12+)
-- **SDL2** development libraries
-- **A legally obtained Metal Slug ROM dump** (you must own the game)
+- [docs/game-notes.md](docs/game-notes.md): the ROM set and what the game needed from the toolkit
+- [neogeorecomp](https://github.com/sp00nznet/neogeorecomp): the architecture and recompiler docs
+- [CHANGELOG.md](CHANGELOG.md) · [ROADMAP.md](ROADMAP.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
 
-### Build Steps
+## Contributors
 
-```bash
-git clone --recursive https://github.com/sp00nznet/metalslug.git
-cd metalslug
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-```
-
-### Running
-
-```bash
-./build/metalslug --rom-path /path/to/your/roms/
-```
-
-The ROM path should contain the Metal Slug ROM files (`201-p1.p1`, etc.) plus the Neo Geo BIOS files.
-
-## Recompilation Progress
-
-The recompilation process involves disassembling the 2 MB P ROM, identifying function boundaries, and lifting each function into C. Progress is tracked here:
-
-| Phase | Description | Status |
-|-------|-------------|--------|
-| ROM analysis | Disassemble P ROM, map function boundaries | Not started |
-| Vector table | Identify reset, VBlank, timer interrupt handlers | Not started |
-| BIOS interface | Map BIOS call conventions and system vectors | Not started |
-| Core game loop | Recompile main loop, VBlank handler, state machine | Not started |
-| Input handling | Player controls, coin/start, DIP switches | Not started |
-| Sprite management | Object tables, spawn/update/destroy logic | Not started |
-| Scroll engine | Background scrolling, camera, level streaming | Not started |
-| Player mechanics | Marco/Tarma movement, weapons, vehicle entry/exit | Not started |
-| Enemy AI | Soldier behavior, vehicle patterns, spawning | Not started |
-| Boss logic | Per-boss state machines and attack patterns | Not started |
-| POW system | Prisoner rescue, scoring, item drops | Not started |
-| Audio commands | Sound effect triggers, music cues via Z80 commands | Not started |
-| Attract mode | Title screen, demo play, high score display | Not started |
-| Full playthrough | All 6 missions completable | Not started |
-
-## Technical Notes
-
-### Why Metal Slug Is a Good Recomp Target
-
-1. **No protection**: Unlike Metal Slug X (ALTERA CPLD) or MS3-5 (encrypted ROMs), the original has zero copy protection
-2. **No bankswitching**: 2 MB P ROM fits in the standard two-window layout
-3. **Standard hardware**: Uses no custom mapper chips or exotic cartridge features
-4. **Well-studied game**: Extensive community knowledge of game mechanics, enemy behavior, and level design
-5. **Linear execution**: As a side-scrolling action game, the code flow is relatively straightforward compared to RPGs or strategy games
-
-### Known Technical Details
-
-- The game uses the Neo Geo's auto-animation feature for environmental effects (waterfalls, fire, etc.)
-- Sprite chaining is used extensively for large bosses (Tetsuyuki uses dozens of chained sprites)
-- The SV-001 tank is implemented as a compound object with separate turret/body/tread sprites
-- Debug DIP switches exist that display hex debug info on screen during gameplay
-- Significant unused content exists in the ROM including early character designs and prototype weapon sprites ([The Cutting Room Floor](https://tcrf.net/Metal_Slug:_Super_Vehicle-001_(Neo_Geo)))
-
-## Legal Notice
-
-This project contains no copyrighted game code or data. You must provide your own legally obtained ROM dump from a Metal Slug MVS or AES cartridge that you own. The recompiled source code in this repository represents a transformative reimplementation of the game's logic.
-
-## Related Projects
-
-- [neogeorecomp](https://github.com/sp00nznet/neogeorecomp) — the Neo Geo hardware runtime this project depends on
-- [Neo Drift Out recomp](https://github.com/sp00nznet/neodriftout) — our other Neo Geo recomp target
-- [genrecomp](https://github.com/sp00nznet/genrecomp) — Sega Genesis 68000 recompiler (sister project, same CPU)
-- [ngdevkit](https://github.com/dciabrin/ngdevkit) — open-source Neo Geo development toolkit
-- [N64Recomp](https://github.com/N64Recomp/N64Recomp) — the pioneering static recompiler for N64 games
-
-## Community
-
-- [Neo Geo Forever](https://neogeoforever.com) — forums and Discord
-- [Neo-Geo.com Forums](https://www.neo-geo.com/forums/)
-- [Neo Geo Dev Wiki](https://wiki.neogeodev.org)
-- [Arcade-Projects](https://www.arcade-projects.com)
+No outside contributions yet. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to send one.
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+The code in this repo is MIT ([LICENSE](LICENSE)). *Metal Slug* is © SNK; this project contains none of its code or data and needs your own dump to do anything.
