@@ -27,6 +27,14 @@ All real output from the recompiled build (`--headless --screenshot`):
 
 ## Getting started
 
+### Installer (Windows, Linux, macOS)
+
+1. Download **Metal-Slug-Installer** for your system from the latest [release](https://github.com/sp00nznet/metalslug/releases) or, between releases, from the newest run of the [installer workflow](https://github.com/sp00nznet/metalslug/actions/workflows/installer.yml) (signed in to GitHub). On Linux, unpack the `.tar.gz`; on macOS, unzip the app.
+2. Open it, choose the folder holding your **`mslug.zip`** and **`neogeo.zip`** (MAME sets), and press **Build**. It downloads this repo and runs the same setup as below, installing what's missing, with a progress bar; the full output is under **Show details**.
+3. Press **Play**.
+
+The installer holds no game data and builds from your ROMs on your machine ([recomp-launcher](https://github.com/sp00nznet/recomp-launcher)). It isn't signed: on Windows, SmartScreen asks (**More info**, **Run anyway**); on a Mac, open it once, then **Open Anyway** in System Settings, Privacy & Security.
+
 ### Quick start (Windows)
 
 1. Download this repo: **Code → Download ZIP**, then unzip it. A `git clone` works too.
@@ -36,7 +44,7 @@ All real output from the recompiled build (`--headless --screenshot`):
    It checks for Git, CMake, the Visual Studio C++ build tools and SDL2, and asks before installing anything that's missing (it says what and how big). It finds and checksums your ROMs, recompiles and builds the game (a few minutes), and leaves a **Metal Slug** launcher in the folder. If something fails, it stops with one sentence on what to do and keeps the details in `setup.log`. Running it again picks up where it stopped.
 4. Double-click **Metal Slug**.
 
-**On Linux**, run `./setup.sh` instead, optionally with `--rom-zip PATH --bios-zip PATH`. It does the same steps and offers the `apt` command for anything missing. When it finishes, run `./metalslug.sh`.
+**On Linux or macOS**, run `./setup.sh` instead, optionally with `--rom-zip PATH --bios-zip PATH`. It does the same steps and offers to install anything missing with `apt`, or with Homebrew on a Mac (which also needs Xcode's command line tools: `xcode-select --install`). When it finishes, run `./metalslug.sh`. macOS builds in CI, but no game has been played on a Mac yet; reports are welcome.
 
 Keys: **arrows** move, **Z** shoot, **X** jump, **C** grenade, **5** insert coin, **1** start, **Esc** quit.
 
@@ -44,7 +52,7 @@ Keys: **arrows** move, **Z** shoot, **X** jump, **C** grenade, **5** insert coin
 
 These are the commands `Setup.cmd` runs.
 
-**Prerequisites:** Git; CMake 3.21+; a C and C++ compiler (Visual Studio 2022 with *Desktop development with C++* on Windows, or gcc and g++ on Linux); SDL2 for the window (optional, since headless builds need nothing). On Linux: `sudo apt install git cmake gcc g++ libsdl2-dev`.
+**Prerequisites:** Git; CMake 3.21+; a C and C++ compiler (Visual Studio 2022 with *Desktop development with C++* on Windows, or gcc and g++ on Linux); SDL2 for the window (optional, since headless builds need nothing). On Linux: `sudo apt install git cmake gcc g++ libsdl2-dev`. On macOS: `xcode-select --install`, then `brew install cmake sdl2`.
 
 1. **Clone with the toolkit submodule:**
    ```

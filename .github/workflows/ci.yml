@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +22,10 @@ jobs:
       - name: Install SDL2
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
+
+      - name: Install SDL2 (macOS)
+        if: runner.os == 'macOS'
+        run: brew install sdl2
 
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release

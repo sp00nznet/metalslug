@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # setup.sh - the Quick start for Linux/macOS: the same steps as Setup.cmd.
-# Checks prerequisites (and offers the apt command when one is missing),
+# Checks prerequisites (and offers to install what's missing with apt or
+# Homebrew),
 # finds and checksums your ROMs, builds, profiles, and writes ./metalslug.sh.
 # Re-running resumes. Details go to setup.log.
 #
@@ -24,7 +25,9 @@ done
 echo "setup started $(date)" > "$LOG"
 
 say() { echo "$*"; echo "$*" >> "$LOG"; }
-step() { echo; echo "== $*"; echo "== $*" >> "$LOG"; }
+# "[n/N] what" lines: recomp-launcher's progress bar reads them.
+STEP=0; STEPS=$((5 + PROFILE))
+step() { STEP=$((STEP + 1)); echo; echo "[$STEP/$STEPS] $*"; echo "[$STEP/$STEPS] $*" >> "$LOG"; }
 fail() { echo; echo "Setup stopped: $*"; echo "Details are in $LOG"; echo "FAILED: $*" >> "$LOG"; exit 1; }
 run() { echo "> $*" >> "$LOG"; "$@" >> "$LOG" 2>&1; }
 ask() {
@@ -33,12 +36,21 @@ ask() {
 }
 
 step "Checking prerequisites"
+if [ "$(uname)" = Darwin ]; then
+    # an app started from Finder (the installer) has no Homebrew on PATH
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+    xcode-select -p >/dev/null 2>&1 || fail "Xcode's command line tools are needed: run xcode-select --install, then run setup again."
+fi
 missing=""
 for tool in git cmake cc c++ unzip; do command -v "$tool" >/dev/null || missing="$missing $tool"; done
 pkg-config --exists sdl2 2>/dev/null || missing="$missing sdl2"
 if [ -n "$missing" ]; then
     say "  missing:$missing"
-    if command -v apt-get >/dev/null && ask "Install git cmake gcc g++ unzip libsdl2-dev with apt (sudo, about 200 MB)?"; then
+    if [ "$(uname)" = Darwin ]; then
+        command -v brew >/dev/null || fail "Homebrew is needed to install$missing: see https://brew.sh, then run setup again."
+        ask "Install cmake, sdl2 and pkg-config with Homebrew (about 100 MB)?" || fail "install:$missing (brew install cmake sdl2 pkg-config) and run setup again."
+        run brew install cmake sdl2 pkg-config || fail "Homebrew could not install the prerequisites."
+    elif command -v apt-get >/dev/null && ask "Install git cmake gcc g++ unzip libsdl2-dev with apt (sudo, about 200 MB)?"; then
         run sudo apt-get update && run sudo apt-get install -y git cmake gcc g++ unzip libsdl2-dev pkg-config \
             || fail "apt could not install the prerequisites."
     else
@@ -105,4 +117,4 @@ EOF
 chmod +x "$ROOT/metalslug.sh"
 echo
 echo "Done. Run ./metalslug.sh to play."
-echo "Keys: arrows move, Z shoot, X jump, C grenade, 5 insert coin, 1 start, Esc quit. No sound yet."
+echo "Keys: arrows move, Z shoot, X jump, C grenade, 5 insert coin, 1 start, Esc quit."
