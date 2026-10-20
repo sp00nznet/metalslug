@@ -34,15 +34,15 @@ ask() {
 
 step "Checking prerequisites"
 missing=""
-for tool in git cmake cc unzip; do command -v "$tool" >/dev/null || missing="$missing $tool"; done
+for tool in git cmake cc c++ unzip; do command -v "$tool" >/dev/null || missing="$missing $tool"; done
 pkg-config --exists sdl2 2>/dev/null || missing="$missing sdl2"
 if [ -n "$missing" ]; then
     say "  missing:$missing"
-    if command -v apt-get >/dev/null && ask "Install git cmake gcc unzip libsdl2-dev with apt (sudo, about 200 MB)?"; then
-        run sudo apt-get update && run sudo apt-get install -y git cmake gcc unzip libsdl2-dev pkg-config \
+    if command -v apt-get >/dev/null && ask "Install git cmake gcc g++ unzip libsdl2-dev with apt (sudo, about 200 MB)?"; then
+        run sudo apt-get update && run sudo apt-get install -y git cmake gcc g++ unzip libsdl2-dev pkg-config \
             || fail "apt could not install the prerequisites."
     else
-        fail "install:$missing (e.g. sudo apt install git cmake gcc unzip libsdl2-dev) and run ./setup.sh again."
+        fail "install:$missing (e.g. sudo apt install git cmake gcc g++ unzip libsdl2-dev) and run ./setup.sh again."
     fi
 fi
 say "  $(cmake --version | head -1)"

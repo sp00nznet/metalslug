@@ -8,12 +8,12 @@ This is the reference game for neogeorecomp. The toolkit does all the work; this
 
 ## Status
 
-**v0.1.0-dev, alpha.** Metal Slug boots, runs attract mode, takes a coin and plays Mission 1 on recompiled code. **There is no sound yet.**
+**v0.1.0-dev, alpha.** Metal Slug boots, runs attract mode, takes a coin and plays Mission 1 on recompiled code. Sound plays through the YM2610 synthesis neogeorecomp gained in [#3](https://github.com/sp00nznet/neogeorecomp/pull/3).
 
 - Boot through the real MVS system ROM → eyecatcher → title → How to Play → Mission 1, with continues.
 - A 5-minute scripted soak runs **100% natively** (0 interpreted instructions) after the profile pass, and `--verify` checks **14.06M** recompiled blocks against the Musashi interpreter with **0 mismatches**.
 - Frame output is identical to the interpreter's, byte for byte, and identical between Windows and Linux builds.
-- Not yet: sound, later missions checked by script, gamepad support, and a settings menu.
+- Not yet: later missions checked by script, gamepad support, and a settings menu.
 
 ## Screenshots
 
@@ -44,7 +44,7 @@ Keys: **arrows** move, **Z** shoot, **X** jump, **C** grenade, **5** insert coin
 
 These are the commands `Setup.cmd` runs.
 
-**Prerequisites:** Git; CMake 3.21+; a C compiler (Visual Studio 2022 with *Desktop development with C++* on Windows, or gcc on Linux); SDL2 for the window (optional, since headless builds need nothing). On Linux: `sudo apt install git cmake gcc libsdl2-dev`.
+**Prerequisites:** Git; CMake 3.21+; a C and C++ compiler (Visual Studio 2022 with *Desktop development with C++* on Windows, or gcc and g++ on Linux); SDL2 for the window (optional, since headless builds need nothing). On Linux: `sudo apt install git cmake gcc g++ libsdl2-dev`.
 
 1. **Clone with the toolkit submodule:**
    ```
@@ -89,6 +89,7 @@ metalslug --rom-path roms                                  # play
 metalslug --headless --frames 1900 --input tests/coin_start.txt --record run.mp4
 metalslug --headless --verify --frames 1801 --input tests/coin_start.txt
 metalslug --headless --interp --frames 1801 --screenshot 1800:interp.png
+metalslug --headless --frames 1900 --input tests/coin_start.txt --wav run.wav   # audio to a file
 ```
 
 The toolkit's [docs/running.md](https://github.com/sp00nznet/neogeorecomp/blob/master/docs/running.md) covers every option and the input-script format. `tests/coin_start.txt` reaches Mission 1, and `tests/play_long.txt` is the 5-minute soak.
