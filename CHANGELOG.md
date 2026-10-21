@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ### Added
 - **Gamepads**: the toolkit is pinned at neogeorecomp v0.2.0 (af96b2b), which reads up to two SDL2 gamepads as players 1 and 2 (neogeorecomp #6).
-- **Sound**: the toolkit is pinned at neogeorecomp #3 (YM2610 synthesis through ymfm). The window plays it, `--wav FILE` writes it, `--mute` silences it. The build now enables C++ for ymfm, and `setup.sh` checks for g++.
+- **Sound**: the toolkit is pinned at neogeorecomp #3 (YM2610 synthesis through ymfm). The window plays it, `--wav FILE` writes it, `--mute` silences it. The build now enables C++ for ymfm, and `setup.sh` checks for g++. Sound is by *[@danilopaulinodasilva](https://github.com/danilopaulinodasilva)* (neogeorecomp #3).
 - CI: builds the interpreter-only player on Ubuntu, Windows and macOS on every push and PR.
 - **Installer** (recomp-launcher): `launcher/launcher.json` and the `installer` workflow build Metal-Slug-Installer for Windows, Linux and macOS on every push; a `v*` tag attaches them to the release.
 - `setup.sh` runs on macOS (Homebrew), and both setup scripts print `[n/N]` steps for the installer's progress bar. On Windows, installing Git or CMake no longer stops setup for a rerun.
