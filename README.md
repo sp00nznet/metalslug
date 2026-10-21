@@ -8,12 +8,12 @@ This is the reference game for neogeorecomp. The toolkit does all the work; this
 
 ## Status
 
-**v0.1.0-dev, alpha.** Metal Slug boots, runs attract mode, takes a coin and plays Mission 1 on recompiled code. Sound plays through the YM2610 synthesis neogeorecomp gained in [#3](https://github.com/sp00nznet/neogeorecomp/pull/3).
+**v0.1.0, alpha.** Metal Slug boots, runs attract mode, takes a coin and plays Mission 1 on recompiled code. Sound plays through the YM2610 synthesis neogeorecomp gained in [#3](https://github.com/sp00nznet/neogeorecomp/pull/3).
 
 - Boot through the real MVS system ROM → eyecatcher → title → How to Play → Mission 1, with continues.
 - A 5-minute scripted soak runs **100% natively** (0 interpreted instructions) after the profile pass, and `--verify` checks **14.06M** recompiled blocks against the Musashi interpreter with **0 mismatches**.
 - Frame output is identical to the interpreter's, byte for byte, and identical between Windows and Linux builds.
-- Not yet: later missions checked by script, gamepad support, and a settings menu.
+- Not yet: later missions checked by script, and a settings menu.
 
 ## Screenshots
 
@@ -47,6 +47,8 @@ The installer holds no game data and builds from your ROMs on your machine ([rec
 **On Linux or macOS**, run `./setup.sh` instead, optionally with `--rom-zip PATH --bios-zip PATH`. It does the same steps and offers to install anything missing with `apt`, or with Homebrew on a Mac (which also needs Xcode's command line tools: `xcode-select --install`). When it finishes, run `./metalslug.sh`. macOS builds in CI, but no game has been played on a Mac yet; reports are welcome.
 
 Keys: **arrows** move, **Z** shoot, **X** jump, **C** grenade, **5** insert coin, **1** start, **Esc** quit.
+
+**Gamepad**: D-pad or stick move, **A** shoot, **B** jump, **X** grenade, **Back** coin, **Start** start. Two pads play as players 1 and 2; plug them in any time. The toolkit's [docs/running.md](https://github.com/sp00nznet/neogeorecomp/blob/master/docs/running.md) has the full layout.
 
 ### Step by step
 
